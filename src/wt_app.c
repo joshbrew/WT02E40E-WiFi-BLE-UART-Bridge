@@ -18,6 +18,7 @@
 #include "wt_ble.h"
 #include "wt_common.h"
 #include "wt_config.h"
+#include "wt_leds.h"
 #include "wt_radio.h"
 #include "wt_wifi.h"
 
@@ -541,7 +542,7 @@ int wt_app_config_reset(void)
 	if (ret) { return ret; }
 	ret = wt_wifi_discovery_service_set(false);
 	if (ret) { return ret; }
-	ret = wt_wifi_cmd_service_set(true);
+	ret = wt_wifi_cmd_service_set(false);
 	if (ret) { return ret; }
 	ret = wt_wifi_cmd_port_set(WT_WIFI_CMD_UDP_PORT);
 	if (ret) { return ret; }
@@ -570,9 +571,10 @@ int wt_app_config_reset(void)
 int wt_app_version_format(char *buf, size_t size)
 {
 	return app_rsp(buf, size,
-			       "WT02E40E fw=%s build=%s %s board=nrf7002dk/nrf5340/cpuapp boot_mode=%s mtu_target=256 tx_max=%u wifi_cmd_port=%u discovery_port=%u",
-			       WT_APP_FW_VERSION, __DATE__, __TIME__, wt_app_boot_mode_get(),
-			       WT_TX_PAYLOAD_MAX, wt_wifi_cmd_port(), WT_WIFI_DISCOVERY_UDP_PORT);
+				       "WT02E40E fw=%s build=%s %s board=nrf7002dk/nrf5340/cpuapp boot=%s ble_pkt=%u tx_max=%u cmd_port=%u disc_port=%u",
+				       WT_APP_FW_VERSION, __DATE__, __TIME__, wt_app_boot_mode_get(),
+				       WT_BLE_NOTIFY_APP_PAYLOAD_MAX, WT_TX_PAYLOAD_MAX, wt_wifi_cmd_port(), WT_WIFI_DISCOVERY_UDP_PORT);
+
 }
 
 int wt_app_fw_status_format(char *buf, size_t size)
@@ -633,23 +635,23 @@ int wt_app_wifi_status_format(char *buf, size_t size, bool json)
 
 	if (json) {
 		return app_rsp(buf, size,
-				       "{\"wifi_requested\":%s,\"wifi_associated\":%s,\"ipv4_bound\":%s,\"ip\":\"%s\",\"mac\":\"%s\",\"cmd_enabled\":%s,\"cmd_port\":%u,\"discovery\":%s,\"discovery_port\":%u}",
-				       wt_wifi_is_requested() ? "true" : "false",
-				       wt_wifi_is_associated() ? "true" : "false",
-				       wt_wifi_has_ipv4() ? "true" : "false",
-				       ip, mac,
-				       wt_wifi_cmd_is_enabled() ? "true" : "false",
-				       wt_wifi_cmd_port(),
-				       wt_wifi_discovery_is_enabled() ? "true" : "false",
-				       WT_WIFI_DISCOVERY_UDP_PORT);
+					       "{\"type\":\"wifi_status\",\"req\":%s,\"assoc\":%s,\"ipv4\":%s,\"ip\":\"%s\",\"mac\":\"%s\",\"cmd\":%s,\"cmd_port\":%u,\"disc\":%s,\"scan\":%s,\"scan_count\":%d}",
+					       wt_wifi_is_requested() ? "true" : "false",
+					       wt_wifi_is_associated() ? "true" : "false",
+					       wt_wifi_has_ipv4() ? "true" : "false",
+					       ip, mac,
+					       wt_wifi_cmd_is_enabled() ? "true" : "false",
+					       wt_wifi_cmd_port(),
+					       wt_wifi_discovery_is_enabled() ? "true" : "false",
+					       wt_wifi_scan_is_running() ? "true" : "false", wt_wifi_scan_count());
 	}
-
 	return app_rsp(buf, size,
-			       "wifi status requested=%s associated=%s ipv4=%s ip=%s mac=%s cmd=%s cmd_port=%u discovery=%s discovery_port=%u",
+			       "wifi status requested=%s associated=%s ipv4=%s ip=%s mac=%s cmd=%s cmd_port=%u discovery=%s discovery_port=%u scan=%s scan_count=%d",
 			       wt_onoff_txt(wt_wifi_is_requested()), wt_onoff_txt(wt_wifi_is_associated()),
 			       wt_onoff_txt(wt_wifi_has_ipv4()), ip, mac,
 			       wt_onoff_txt(wt_wifi_cmd_is_enabled()), wt_wifi_cmd_port(),
-			       wt_onoff_txt(wt_wifi_discovery_is_enabled()), WT_WIFI_DISCOVERY_UDP_PORT);
+			       wt_onoff_txt(wt_wifi_discovery_is_enabled()), WT_WIFI_DISCOVERY_UDP_PORT,
+			       wt_onoff_txt(wt_wifi_scan_is_running()), wt_wifi_scan_count());
 }
 
 int wt_app_config_format(char *buf, size_t size, bool json)
@@ -662,25 +664,13 @@ int wt_app_config_format(char *buf, size_t size, bool json)
 
 	if (json) {
 		return app_rsp(buf, size,
-				       "{\"name\":\"%s\",\"fw\":\"%s\",\"mode\":\"%s\",\"boot_mode\":\"%s\",\"ble_requested\":%s,\"ble_ready\":%s,\"ble_connected\":%s,\"ble_advertising\":%s,\"wifi_requested\":%s,\"wifi_associated\":%s,\"ipv4\":%s,\"ip\":\"%s\",\"mac\":\"%s\",\"wifi_cmd\":%s,\"wifi_cmd_port\":%u,\"discovery\":%s,\"discovery_port\":%u,\"bridge_ble\":%s,\"bridge_uart\":%s,\"bridge_wifi\":%s,\"bridge_target\":\"%s\",\"bridge_port\":%u,\"tx_max\":%u,\"uptime_s\":%lld}",
-				       wt_ble_name_get(), WT_APP_FW_VERSION, current_mode(), wt_app_boot_mode_get(),
-				       wt_ble_is_requested() ? "true" : "false",
-				       wt_ble_is_ready() ? "true" : "false",
-				       wt_ble_is_connected() ? "true" : "false",
-				       wt_ble_is_advertising() ? "true" : "false",
-				       wt_wifi_is_requested() ? "true" : "false",
-				       wt_wifi_is_associated() ? "true" : "false",
-				       wt_wifi_has_ipv4() ? "true" : "false",
-				       ip, mac,
-				       wt_wifi_cmd_is_enabled() ? "true" : "false",
-				       wt_wifi_cmd_port(),
-				       wt_wifi_discovery_is_enabled() ? "true" : "false",
-				       WT_WIFI_DISCOVERY_UDP_PORT,
-				       bridge_ble_enabled ? "true" : "false",
-				       bridge_uart_enabled ? "true" : "false",
-				       bridge_wifi_enabled ? "true" : "false",
-				       bridge_wifi_ip, bridge_wifi_port,
-				       WT_TX_PAYLOAD_MAX, (long long)(k_uptime_get() / 1000));
+					       "{\"t\":\"cfg\",\"n\":\"%s\",\"fw\":\"%s\",\"m\":\"%s\",\"b\":\"%s\",\"ble\":%d,\"adv\":%d,\"wifi\":%d,\"ip\":\"%s\",\"cmd\":%u,\"disc\":%d,\"scan\":%d,\"cnt\":%d,\"up\":%lld}",
+					       wt_ble_name_get(), WT_APP_FW_VERSION, current_mode(), wt_app_boot_mode_get(),
+					       wt_ble_is_requested() ? 1 : 0, wt_ble_is_advertising() ? 1 : 0,
+					       wt_wifi_is_requested() ? 1 : 0, ip, wt_wifi_cmd_port(),
+					       wt_wifi_discovery_is_enabled() ? 1 : 0,
+					       wt_wifi_scan_is_running() ? 1 : 0, wt_wifi_scan_count(),
+					       (long long)(k_uptime_get() / 1000));
 	}
 
 	return app_rsp(buf, size,
@@ -695,6 +685,50 @@ int wt_app_config_format(char *buf, size_t size, bool json)
 			       wt_onoff_txt(bridge_ble_enabled), wt_onoff_txt(bridge_uart_enabled),
 			       wt_onoff_txt(bridge_wifi_enabled), bridge_wifi_ip[0] ? bridge_wifi_ip : "<unset>",
 			       bridge_wifi_port, WT_TX_PAYLOAD_MAX, (long long)(k_uptime_get() / 1000));
+}
+
+
+int wt_app_led_command(char **argv, size_t argc, char *rsp, size_t rsp_len)
+{
+	int ret;
+	const char *target = argc >= 3 ? argv[2] : "all";
+
+	if (!rsp || rsp_len == 0) {
+		return -EINVAL;
+	}
+
+	if (argc < 2 || !strcmp(argv[1], "status")) {
+		return wt_leds_status_format(rsp, rsp_len);
+	}
+
+	if (!strcmp(argv[1], "test")) {
+		ret = wt_leds_test(target);
+		return ret ? app_rsp(rsp, rsp_len, "err led test %d", ret) :
+		       app_rsp(rsp, rsp_len, "ok led test %s", target);
+	}
+
+	if (!strcmp(argv[1], "pulse") || !strcmp(argv[1], "activity")) {
+		if (!strcmp(target, "all")) {
+			wt_leds_ble_activity();
+			wt_leds_wifi_activity();
+			wt_leds_bridge_activity();
+			wt_leds_error_activity();
+		} else if (!strcmp(target, "ble") || !strcmp(target, "bt")) {
+			wt_leds_ble_activity();
+		} else if (!strcmp(target, "wifi") || !strcmp(target, "wi-fi")) {
+			wt_leds_wifi_activity();
+		} else if (!strcmp(target, "bridge") || !strcmp(target, "tx") || !strcmp(target, "activity")) {
+			wt_leds_bridge_activity();
+		} else if (!strcmp(target, "alert") || !strcmp(target, "error") || !strcmp(target, "err")) {
+			wt_leds_error_activity();
+		} else {
+			return app_rsp(rsp, rsp_len, "usage led status|test [all|ble|wifi|activity|alert]|pulse [all|ble|wifi|activity|alert]");
+		}
+
+		return app_rsp(rsp, rsp_len, "ok led pulse %s", target);
+	}
+
+	return app_rsp(rsp, rsp_len, "usage led status|test [all|ble|wifi|activity|alert]|pulse [all|ble|wifi|activity|alert]");
 }
 
 int wt_app_ping_execute(char **argv, size_t argc, char *rsp, size_t rsp_len)
