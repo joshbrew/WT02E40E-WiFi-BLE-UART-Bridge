@@ -23,5 +23,6 @@ target_sources(app PRIVATE
 	src/wt_radio.c
 	src/wt_shell.c
 	src/wt_stream.c
+	src/wt_tx_route.c
 	src/wt_wifi.c
 )

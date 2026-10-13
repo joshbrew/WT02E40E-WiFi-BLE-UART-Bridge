@@ -4,8 +4,9 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
+#include "wt_tx_route.h"
 
-#define WT_APP_FW_VERSION "0.3.9-wifi-led-idle"
+#define WT_APP_FW_VERSION "0.4.0-independent-routing"
 
 int wt_app_settings_init(void);
 int wt_app_config_save(void);
@@ -34,6 +35,8 @@ int wt_app_bridge_set(const char *path, bool enable);
 int wt_app_bridge_target_set(const char *ip, const char *port_text);
 int wt_app_bridge_status_format(char *buf, size_t size, bool json);
 int wt_app_bridge_send(const uint8_t *data, size_t len, char *rsp, size_t rsp_len);
+int wt_app_tx_other(enum wt_tx_origin origin, const char *ip, const char *port,
+		    const uint8_t *data, size_t len, char *rsp, size_t rsp_len);
 
 int wt_app_ping_execute(char **argv, size_t argc, char *rsp, size_t rsp_len);
 int wt_app_boot_command(char **argv, size_t argc, char *rsp, size_t rsp_len);

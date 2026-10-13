@@ -1,0 +1,73 @@
+{
+  "version": "0.4.0-independent-routing",
+  "date": "2026-10-13",
+  "sdk": "NCS v3.3.1",
+  "zephyr": "4.3.99 (ncs-v3.3.1)",
+  "toolchain": "936afb6332 / GNU 12.2.0",
+  "board": "nrf7002dk/nrf5340/cpuapp",
+  "sysbuild": true,
+  "extra_overlay": "boards/jolteon_uart.overlay",
+  "uart": {
+    "tx": "P1.04",
+    "rx": "P1.05",
+    "baud": 115200
+  },
+  "physical_hardware_tested": false,
+  "routing_host_tests": "passed",
+  "git_head": "d522312e15c0bc28b3d2ed41038ff99b40627678",
+  "includes_uncommitted_changes": true,
+  "images": {
+    "merged.hex": {
+      "sha256": "f26e1e67f177c697f5aaa1efd532ae44f9b74e05e2cbb478d9e84e0253fa5be1",
+      "bytes": 2001495
+    },
+    "application.hex": {
+      "sha256": "550c3e39c3f7f691a9dc669aa2a9b22683e09fb9d7dd701d39ffa33f456239f7",
+      "bytes": 2001681
+    },
+    "application.bin": {
+      "sha256": "c415292c60f12ad566267617ccb675f81606053b47eef575a820db75fb9fa787",
+      "bytes": 711584
+    },
+    "network_core.hex": {
+      "sha256": "67bc3545d944938b486394cde4446b80919fac15c545fb34d728ca47c1758a77",
+      "bytes": 403052
+    },
+    "network_core.bin": {
+      "sha256": "a1c008b0f2b870ccdecaa459415f6d891f15c6c96acde92428a71a00bf237eae",
+      "bytes": 143292
+    }
+  },
+  "source_sha256": {
+    "app.overlay": "9035e2f3efa8b2e7726c10c0b057c19807592e6409900357e9553a6f5a27c628",
+    "boards/jolteon_uart.overlay": "4f053415c887fc0851cf7ee2185ba936d9b65c748b74b2e22ea529c4181f3f60",
+    "build_jolteon.ps1": "3e9a6e8bf7234d49237f9e53ad57f8f65f3fb4ed32866d92dd3e5e019a817d3a",
+    "CMakeLists.txt": "e1905573986462c9c875fca395bdfe623160785aa8f41af4774ce89c81cc31f3",
+    "Kconfig": "fc2afeab1eb851be9b9b896aea9bf9c5319cd99fc83232a09ee6c6cb5e827f8f",
+    "prj.conf": "5d1f57208f536a742e2e4168f22c619d5256c3b041c9b3dab1f8c5119d1f26a6",
+    "src/main.c": "9763bcf17c3bb6471ebc15b352f5ae1e67a2be760898ff1cf903aa5ab2875cbc",
+    "src/wt_app.c": "055e4808e9cbe4f047d5a69ea1e9bf41321d4e596f109b3886c9b4c071ca4d85",
+    "src/wt_app.h": "0dabe95b3880c0b9b849315a7c1f0112b4131ac9b86f5ed3f879ce94d2fc22e5",
+    "src/wt_ble.c": "8b93d918659b50d01892d5ba5361ffed8293391a96b761f2c1430209f79c9844",
+    "src/wt_ble.h": "da0cd5a993edafcec6566c7d25411b19b6cc435a4a91a6d71ac1546707420504",
+    "src/wt_common.c": "f1a18a621c22d5a783d6c1bd903a385fab278726bba509fcaf584c3aab775031",
+    "src/wt_common.h": "59cceafb1a3395853129e038a0118711c9c369c2b184f94391b4a5c7382b5bca",
+    "src/wt_config.h": "a9676b525fa3bac7da165156c3570958305d8e8f8d932eb83f3249cecb24b7d5",
+    "src/wt_leds.c": "b1a338a60eb97ae003607233fe948946bbd8de0a59bbf9b3f75fadd3823a136e",
+    "src/wt_leds.h": "84544d8031fcc6d67f812e9097212153fd25ed4599451796181c3a65e4d64471",
+    "src/wt_radio.c": "df456e604be5e11e765276b05f7c42ed711a02474e2d2037663829b26b06453b",
+    "src/wt_radio.h": "9c73c866ea1f397ba10e4202d90bc47778acdb66c509da36c78303f9c57e0f28",
+    "src/wt_shell.c": "66ccfd3ff13d94b30f03b47cda1788ed4c4bb607883478458fa68eeb7cdb14bf",
+    "src/wt_stream.c": "8acc13f9ccab7c0b5d1467e9eb68982e0927e948476db0afc05f81c156744033",
+    "src/wt_stream.h": "1592a0885a3e0c03140ea455d67753b344d9e262c2744f4b93173f318d78fa30",
+    "src/wt_tx_route.c": "108de15fadfe8728c3532c5736a7fd56040918fad01b833d56ca2e5ab5bd1f03",
+    "src/wt_tx_route.h": "5c1db2463d1bba0c3c6633ccd354120e2ce56ce39776e97e3f8809f348560e22",
+    "src/wt_wifi.c": "da58975fdb588078dfc471e7e4bc1165da7787b08b8ee6a8da978760b355fd4f",
+    "src/wt_wifi.h": "2aad21bb5faf6b795829445b82c16576e1365219f0a0481ebe5cfb43da5a1323",
+    "sysbuild.conf": "f4029e6e8b51882209e123d2445eff1bf82773bc01e9c2497fc14cc8ee0625c1"
+  },
+  "build_config_sha256": {
+    "WT02E40E_Bridge": "e344ae0e5ab3ff1bfc160c08ade8573553c8f68414464416a2dcf359d5275774",
+    "hci_ipc": "75a0217d90615982a62a351bdc7bd76551e3055d50539d64c94d5a6b950e866a"
+  }
+}

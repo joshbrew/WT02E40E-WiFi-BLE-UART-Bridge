@@ -1834,21 +1834,10 @@ static int wt_wifi_command_tx(char **argv, size_t argc, char *rsp, size_t rsp_le
 			return wt_wifi_cmd_rsp(rsp, rsp_len, "err payload %d", payload_len);
 		}
 
-		ret = wt_wifi_udp_transmit_payload(argv[2], argv[3],
-						       (const uint8_t *)payload, payload_len);
-		if (ret) {
-			return wt_wifi_cmd_rsp(rsp, rsp_len, "err wifi tx %d", ret);
-		}
-
-		(void)wt_wifi_cmd_tx_uart_payload(argv, argc, 4);
-		ret = wt_ble_transmit_payload((const uint8_t *)payload, payload_len);
-		if (ret && ret != -EACCES) {
-			return wt_wifi_cmd_rsp(rsp, rsp_len, "err ble tx %d after wifi/uart", ret);
-		}
-
-		return wt_wifi_cmd_rsp(rsp, rsp_len, "ok wifi+uart%s tx %d bytes%s",
-					      ret == -EACCES ? "" : "+ble", payload_len,
-					      ret == -EACCES ? " (ble notify off)" : "");
+		char response[240];
+		wt_app_tx_other(WT_TX_WIFI, argv[2], argv[3],
+			(const uint8_t *)payload, payload_len, response, sizeof(response));
+		return wt_wifi_cmd_rsp(rsp, rsp_len, "%s", response);
 	}
 
 	return wt_wifi_cmd_rsp(rsp, rsp_len, "usage tx ble|uart|wifi|both ...");

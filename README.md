@@ -2,23 +2,20 @@
 
 This project is a bring-up and command bridge application for the WT02E40E module, which combines an nRF5340 host MCU with an nRF7002 Wi-Fi companion.
 
+The Jolteon update adds independent `tx both` forwarding to the other transports
+and an optional UART RX=P1.05 hardware profile. See [JOLTEON_UPDATE.md](JOLTEON_UPDATE.md)
+for build and validation details and [WT02E40E_COMMANDS.md](WT02E40E_COMMANDS.md#tx-both-forward-to-the-other-transports)
+for routing semantics.
+
 The firmware starts in BLE command mode by default. Wi-Fi stays off until a command asks for it, or until a scan temporarily powers it for the scan. The same command system is exposed through BLE, UART/RTT shell, and UDP once Wi-Fi has an IPv4 address.
 
-<<<<<<< HEAD
 The repository also includes `BLE_Webapp/`, a Chrome/Edge Web Bluetooth console with a small Node helper for UDP testing. It is useful for quick checks after flashing, scan testing, BLE TX notification testing, and Wi-Fi command bridge testing.
 
-<img width="500" alt="WT02E40E bring-up board" src="https://github.com/user-attachments/assets/7c44a742-f9b0-41f6-8764-3b026d386278" />
-<img width="500" alt="WT02E40E web console" src="https://github.com/user-attachments/assets/a4b94aed-e316-48fd-9c9b-f96997f97339" />
-
-=======
-The repository also includes `BLE_Webapp/`, a Chrome/Edge Web Bluetooth console with a small Node helper for UDP testing. 
-
-BLE, UART, and WiFi AP Scanning are tested and working. We are still testing the rest.
+BLE, UART, and Wi-Fi AP scanning have been tested and are working on the existing firmware. The other features remain under test; the Jolteon routing update still needs hardware validation.
 
 <img width="500" alt="WT02E40E bring-up board" src="https://github.com/user-attachments/assets/7c44a742-f9b0-41f6-8764-3b026d386278" />
 <img width="500" alt="WT02E40E web console" src="https://github.com/user-attachments/assets/a4b94aed-e316-48fd-9c9b-f96997f97339" />
 
->>>>>>> 3e4d01bb8173c63dada94ab60bb7fcfa77bf2a98
 ## Table of contents
 
 - [What this firmware does](#what-this-firmware-does)

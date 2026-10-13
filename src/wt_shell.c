@@ -539,23 +539,11 @@ static int shell_cmd_wt_tx(const struct shell *sh, size_t argc, char **argv)
 			return payload_len;
 		}
 
-		ret = wt_wifi_udp_transmit_payload(argv[2], argv[3],
-						(const uint8_t *)tx_payload_buf, payload_len);
-		if (ret) {
-			shell_error(sh, "Wi-Fi UDP transmit failed: %d", ret);
-			return ret;
-		}
-
-		(void)shell_tx_uart_payload(argc, argv, 4);
-		ret = wt_ble_transmit_payload((const uint8_t *)tx_payload_buf, payload_len);
-		if (ret && ret != -EACCES) {
-			shell_error(sh, "BLE transmit failed after Wi-Fi/UART TX: %d", ret);
-			return ret;
-		}
-
-		shell_print(sh, "both TX: %d bytes%s", payload_len,
-			    ret == -EACCES ? " (BLE notify off)" : "");
-		return 0;
+		char response[240];
+		ret = wt_app_tx_other(WT_TX_UART, argv[2], argv[3],
+			(const uint8_t *)tx_payload_buf, payload_len, response, sizeof(response));
+		shell_print(sh, "%s", response);
+		return ret;
 	}
 
 	shell_print(sh, "usage: wt tx ble|uart|wifi|both ...");

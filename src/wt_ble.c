@@ -949,21 +949,10 @@ static int wt_ble_command_tx(char **argv, size_t argc, const char *raw_line)
 			return wt_ble_rsp_send("err payload %d", payload_len);
 		}
 
-		ret = wt_wifi_udp_transmit_payload(argv[2], argv[3],
-						       (const uint8_t *)payload, payload_len);
-		if (ret) {
-			return wt_ble_rsp_send("err wifi tx %d", ret);
-		}
-
-		(void)wt_ble_tx_uart_payload(argv, argc, 4);
-		ret = wt_ble_transmit_payload((const uint8_t *)payload, payload_len);
-		if (ret && ret != -EACCES) {
-			return wt_ble_rsp_send("err ble tx %d after wifi/uart", ret);
-		}
-
-		return wt_ble_rsp_send("ok wifi+uart%s tx %d bytes%s",
-					      ret == -EACCES ? "" : "+ble", payload_len,
-					      ret == -EACCES ? " (ble notify off)" : "");
+		char response[240];
+		wt_app_tx_other(WT_TX_BLE, argv[2], argv[3],
+			(const uint8_t *)payload, payload_len, response, sizeof(response));
+		return wt_ble_rsp_send("%s", response);
 	}
 
 	return wt_ble_rsp_send("usage tx ble|uart|wifi|both ... argc %u subcmd %s raw %.64s", (unsigned int)argc, argc >= 2 ? argv[1] : "", raw_line ? raw_line : "");

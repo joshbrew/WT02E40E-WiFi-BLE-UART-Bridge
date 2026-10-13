@@ -102,6 +102,37 @@ wt fw reboot [delay]
 wt fw reboot bootloader [delay]
 ```
 
+## `tx both`: forward to the other transports
+
+`both` (alias `all`) excludes the transport carrying the command:
+
+| Command arrives over | Payload destinations |
+|---|---|
+| UART (`wt tx both ...`) | BLE TX notification and Wi-Fi UDP |
+| BLE (`tx both ...`) | UART and Wi-Fi UDP |
+| Wi-Fi (`tx both ...`) | UART and BLE TX notification |
+
+Each destination is attempted independently. BLE requires a connected client
+subscribed to TX notifications. Wi-Fi requires an IPv4 address and a destination
+IP/port. Use `0.0.0.0 0` to leave the Wi-Fi destination unset. The response reports
+`source`, `unavailable`, `notify_off`, `no_target`, `queued`, or `failed` per
+destination, plus `accepted`. `ok` means at least one destination accepted the
+payload locally; it does not prove delivery to a remote client. Command responses
+still return to their caller.
+
+The response also includes `tag`, a bounded first word (letters, digits, `#`,
+`_`, `-`, `.`) of the payload, or `-` when empty. Senders can use a unique leading
+token to correlate retries; the payload is still transmitted unchanged.
+
+```txt
+wt tx both 0.0.0.0 0 "BLE-only fallback from the SAMD21"
+wt tx both 192.168.1.50 5000 "BLE and Wi-Fi from the SAMD21"
+```
+
+From BLE, `tx uart "j18 all"` sends a command to the SAMD21 verification sketch.
+`tx both 192.168.1.50 5000 "j18 summary"` also forwards that text to Wi-Fi.
+The target IP/port are ignored for Wi-Fi-origin `tx both`, since Wi-Fi is the source.
+
 ## Quoted arguments
 
 Use quotes for SSIDs, passwords, names, and payloads with spaces.

@@ -324,6 +324,62 @@ int wt_app_bridge_status_format(char *buf, size_t size, bool json)
 			       bridge_wifi_ip[0] ? bridge_wifi_ip : "<unset>", bridge_wifi_port);
 }
 
+static int tx_other_uart(void *context, const uint8_t *data, size_t len)
+{
+	enum wt_tx_origin origin = *(enum wt_tx_origin *)context;
+	printk("%s UART TX: %.*s\r\n", origin == WT_TX_BLE ? "BLE" : "WIFI",
+	       (int)len, (const char *)data);
+	return 0;
+}
+
+static int tx_other_ble(void *context, const uint8_t *data, size_t len)
+{
+	ARG_UNUSED(context);
+	return wt_ble_transmit_payload(data, len);
+}
+
+static int tx_other_wifi(void *context, const char *ip, const char *port,
+			 const uint8_t *data, size_t len)
+{
+	ARG_UNUSED(context);
+	return wt_wifi_udp_transmit_payload(ip, port, data, len);
+}
+
+int wt_app_tx_other(enum wt_tx_origin origin, const char *ip, const char *port,
+		    const uint8_t *data, size_t len, char *rsp, size_t rsp_len)
+{
+	struct wt_tx_result result = {0};
+	const struct wt_tx_ops ops = {
+		.ble_connected = wt_ble_is_connected(),
+		.ble_notify = wt_ble_tx_notify_is_enabled(),
+		.wifi_ready = wt_wifi_has_ipv4(),
+		.context = &origin,
+		.uart_send = tx_other_uart,
+		.ble_send = tx_other_ble,
+		.wifi_send = tx_other_wifi,
+	};
+	int ret = wt_tx_route_other(origin, ip, port, data, len, &ops, &result);
+	/* Echo a bounded first-word tag for senders correlating retries. */
+	char tag[25];
+	size_t n = 0;
+	while (data && n < len && n < sizeof(tag)-1) {
+		char c = data[n];
+		if (!((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') ||
+		      (c >= '0' && c <= '9') || c == '#' || c == '_' || c == '-' || c == '.')) {
+			break;
+		}
+		tag[n++] = c;
+	}
+	tag[n] = '\0';
+	app_rsp(rsp, rsp_len,
+		"%s tx both len=%u accepted=%u uart=%s ble=%s wifi=%s ble_ret=%d wifi_ret=%d tag=%s",
+		ret ? "err" : "ok", (unsigned)len, result.accepted,
+		wt_tx_state_text(result.uart.state), wt_tx_state_text(result.ble.state),
+		wt_tx_state_text(result.wifi.state), result.ble.error, result.wifi.error,
+		tag[0] ? tag : "-");
+	return ret;
+}
+
 int wt_app_bridge_send(const uint8_t *data, size_t len, char *rsp, size_t rsp_len)
 {
 	char port_text[8];
